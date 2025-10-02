@@ -1,0 +1,22 @@
+[package]
+name = "durable-color-resolver"
+version = "1.0.0"
+edition = "2021"
+description = "A powerful tool for resolving color references using a domain-specific language (DSL) based on CSS and Tailwind color constants"
+license = "MIT"
+
+[lib]
+name = "durable_color_resolver"
+path = "src/lib.rs"
+
+[[bin]]
+name = "durable-color-resolver"
+path = "src/main.rs"
+
+[dependencies]
+palette = "0.7"
+clap = { version = "4.0", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+regex = "1.10"
+nom = "7.1"
