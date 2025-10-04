@@ -1,6 +1,6 @@
-use palette::{FromColor, Oklch, Srgb};
+use palette::{FromColor, OklabHue, Oklch, Srgb};
 
-fn parse_hex(hex: &str) -> Result<Srgb, String> {
+pub fn parse_hex(hex: &str) -> Result<Srgb, String> {
     if hex.len() == 7 && hex.starts_with('#') {
         let r = u8::from_str_radix(&hex[1..3], 16).map_err(|_| "Invalid red")?;
         let g = u8::from_str_radix(&hex[3..5], 16).map_err(|_| "Invalid green")?;
@@ -56,7 +56,7 @@ pub fn color_to_hex(color: Oklch) -> String {
     )
 }
 
-fn parse_percentage(amount: &str) -> Result<f32, String> {
+pub fn parse_percentage(amount: &str) -> Result<f32, String> {
     if amount.ends_with('%') {
         let num: f32 = amount
             .trim_end_matches('%')
@@ -88,7 +88,6 @@ pub fn temperature_up(color: &str, amount: &str) -> Result<String, String> {
     if amt == 0.0 || amt % 360.0 == 0.0 {
         return Ok(color_to_hex(oklch));
     }
-    use palette::OklabHue;
     oklch.hue = OklabHue::new((oklch.hue.into_degrees() + amt) % 360.0);
     Ok(color_to_hex(oklch))
 }
@@ -99,7 +98,6 @@ pub fn temperature_down(color: &str, amount: &str) -> Result<String, String> {
     if amt == 0.0 || amt % 360.0 == 0.0 {
         return Ok(color_to_hex(oklch));
     }
-    use palette::OklabHue;
     oklch.hue = OklabHue::new((oklch.hue.into_degrees() - amt + 360.0) % 360.0);
     Ok(color_to_hex(oklch))
 }
@@ -124,7 +122,7 @@ pub fn mix(color1: &str, color2: &str, ratio: &str) -> Result<String, String> {
     let r: f32 = ratio.parse().map_err(|_| "Invalid ratio".to_string())?;
     let r = r.clamp(0.0, 1.0);
 
-    let mixed = Oklch::new(
+    let mixed = palette::Oklch::new(
         c1.l * (1.0 - r) + c2.l * r,
         c1.chroma * (1.0 - r) + c2.chroma * r,
         c1.hue.into_degrees() * (1.0 - r) + c2.hue.into_degrees() * r,
@@ -136,6 +134,7 @@ pub fn mix(color1: &str, color2: &str, ratio: &str) -> Result<String, String> {
 mod tests {
     use super::*;
 
+    // Tests from color_parsing.rs
     #[test]
     fn test_parse_hex_valid() {
         let result = parse_hex("#ff0000");
@@ -221,6 +220,7 @@ mod tests {
         assert!(parse_color("rgb(255, 0, 0)").is_err());
     }
 
+    // Tests from color_conversion.rs
     #[test]
     fn test_color_to_hex() {
         let oklch = Oklch::new(0.5, 0.1, 120.0);
@@ -231,6 +231,7 @@ mod tests {
         assert!(parse_hex(&hex).is_ok());
     }
 
+    // Tests from utils.rs
     #[test]
     fn test_parse_percentage_with_percent() {
         let result = parse_percentage("50%");
@@ -249,6 +250,7 @@ mod tests {
         assert!(parse_percentage("invalid").is_err());
     }
 
+    // Tests from color_manipulation.rs
     #[test]
     fn test_darken_normal() {
         let result = darken("#ffffff", "50%").unwrap();
